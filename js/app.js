@@ -1,4 +1,9 @@
 var enemyInterval;
+characters = ['images/char-boy.png', 'images/char-cat-girl.png', 'images/char-horn-girl.png', 'images/char-pink-girl.png', 'images/char-princess-girl.png'];
+allEnemies = new Array();
+var enemySpeed = 1;
+var interval = 1600;
+var oneStep = 25;
 
 // Enemies our player must avoid
 var Enemy = function() {
@@ -18,7 +23,7 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    this.x += dt + 1.5;
+    this.x += dt + enemySpeed;
     this.checkCollision();
 };
 
@@ -43,8 +48,6 @@ var Player = function() {
     this.sprite = 'images/char-boy.png';
     this.x = 202.5;
     this.y = 406;
-    //    player.x = playerInitX;
-    //    player.y = playerInitY;
 };
 
 // This class requires an update(), render() and
@@ -58,47 +61,50 @@ Player.prototype.render = function() {
 };
 
 Player.prototype.handleInput = function(key) {
-    function checkBorder() {
-        if (player.x < 5){
-            player.x = 5;
+//    function checkBorder() {
+        if (this.x < 5){
+            this.x = 5;
             return;
-        }else if(player.y <= 0){
-            player.y = 0;
-        }else if (player.x > (ctx.canvas.width - 80)){
-            player.x = ctx.canvas.width - 100;
+        }else if(this.y <= 0){
+            this.y = 0;
             return;
-        }else if (player.y > (ctx.canvas.height - 180)){
-            player.y = ctx.canvas.height - 180;
+        }else if (this.x > (ctx.canvas.width - 80)){
+            this.x = ctx.canvas.width - 100;
             return;
-        };
-    }
-
-    function winner(){
-        if (player.y < 25) {
-            // clearInterval(enemyInterval);
-            alert("Winner!");
-            reset();
+        }else if (this.y > (ctx.canvas.height - 180)){
+            this.y = ctx.canvas.height - 180;
+            return;
         }
-    };
+//    }
 
     switch(key) {
         case "up":
-        player.y -= 25;
-        winner();
-        checkBorder();
+        this.y -= oneStep;
+        this.winner();
+        // checkBorder();
         break;
         case "right":
-        player.x += 25;
-        checkBorder();
+        this.x += oneStep;
+        // checkBorder();
         break;
         case "down":
-        player.y += 25;
-        checkBorder();
+        this.y += oneStep;
+        // checkBorder();
         break;
         case "left":
-        player.x -= 25;
-        checkBorder();
+        this.x -= oneStep;
+        // checkBorder();
         break;
+    }
+};
+
+Player.prototype.winner = function (){
+    if (this.y < oneStep) {
+        // clearInterval(enemyInterval);
+        alert("Winner!");
+        enemySpeed += 1;
+        interval -= 200;
+        reset();
     }
 };
 
@@ -107,9 +113,10 @@ Player.prototype.handleInput = function(key) {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
-characters = ['images/char-boy.png', 'images/char-cat-girl.png', 'images/char-horn-girl.png', 'images/char-pink-girl.png', 'images/char-princess-girl.png'];
-allEnemies = new Array();
-player = new Player();
+ var player = new Player();
+// var player;
+var playerInitX;
+var playerInitY;
 
 
 $("body").html("<div class='container' style='z-index: 5; position: relative; top: 0px; background:rgba(50,60,70,0.5);'></div>");
@@ -118,20 +125,20 @@ $(".container").append("<div class='avatar'></div>");
 
 $( document ).ready(function() {
 
-
     function playGame(img){
+        'use strict';
         playerInitX = (ctx.canvas.width/2) - 50;
         playerInitY = ctx.canvas.height - 200;
         function createEnemy(){
             var randRow = 60 + (Math.round(Math.random() * 2) * 85);
-            enemy = new Enemy();
+            var enemy = new Enemy();
             enemy.y = randRow;
             allEnemies.push(enemy);
-        };
-        enemyInterval = setInterval(createEnemy, 1500);
+        }
+        enemyInterval = setInterval(createEnemy, interval);
         player.sprite = img;
         player.render();
-    };
+    }
     // playGame();
     $.each(characters, function(index){
         $(".container .avatar").append("<a href ='#'><img src='"+characters[index]+"'></a>");
