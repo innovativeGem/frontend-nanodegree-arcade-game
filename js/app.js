@@ -1,9 +1,23 @@
 var enemyInterval;
 characters = ['images/char-boy.png', 'images/char-cat-girl.png', 'images/char-horn-girl.png', 'images/char-pink-girl.png', 'images/char-princess-girl.png'];
-allEnemies = new Array();
-var enemySpeed = 1;
-var interval = 1600;
-var oneStep = 25;
+allEnemies = [];
+var ENEMY_SPEED = 1;
+var INTERVAL = 1600;
+var TILE_WIDTH = 101,
+    TILE_HEIGHT = 83;
+
+
+// Superclass Character
+var Character = function() {
+    this.sprite = '';
+    this.x = 0;
+    this.y = 0;
+};
+
+// Draw the enemy and player on the screen, required method for game
+Character.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
 
 // Enemies our player must avoid
 var Enemy = function() {
@@ -17,13 +31,16 @@ var Enemy = function() {
     this.y = 60;
 };
 
+Enemy.prototype = Object.create(Character.prototype);
+Enemy.prototype.constructor = Enemy;
+
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    this.x += dt + enemySpeed;
+    this.x += dt + ENEMY_SPEED;
     this.checkCollision();
 };
 
@@ -38,10 +55,6 @@ Enemy.prototype.checkCollision = function(){
     }
 };
 
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
 
 // Now write your own player class
 var Player = function() {
@@ -50,62 +63,60 @@ var Player = function() {
     this.y = 406;
 };
 
+Player.prototype = Object.create(Character.prototype);
+Player.prototype.constructor = Player;
+
 // This class requires an update(), render() and
 // a handleInput() method.
 
 Player.prototype.update = function() {
 };
 
-Player.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
 
 Player.prototype.handleInput = function(key) {
-//    function checkBorder() {
-        if (this.x < 5){
-            this.x = 5;
+//  checkBorder
+        if (this.x < 1){
+            this.x = 1;
             return;
-        }else if(this.y <= 0){
-            this.y = 0;
-            return;
-        }else if (this.x > (ctx.canvas.width - 80)){
-            this.x = ctx.canvas.width - 100;
+        }else if (this.x > (ctx.canvas.width - TILE_WIDTH)){
+            this.x = ctx.canvas.width - TILE_WIDTH;
             return;
         }else if (this.y > (ctx.canvas.height - 180)){
-            this.y = ctx.canvas.height - 180;
+            this.y = ctx.canvas.height - 200;
             return;
         }
-//    }
 
     switch(key) {
         case "up":
-        this.y -= oneStep;
+        this.y -= TILE_HEIGHT;
         this.winner();
-        // checkBorder();
         break;
         case "right":
-        this.x += oneStep;
-        // checkBorder();
+        this.x += TILE_WIDTH;
         break;
         case "down":
-        this.y += oneStep;
-        // checkBorder();
+        this.y += TILE_HEIGHT;
         break;
         case "left":
-        this.x -= oneStep;
-        // checkBorder();
+        this.x -= TILE_WIDTH;
         break;
     }
 };
 
 Player.prototype.winner = function (){
-    if (this.y < oneStep) {
+    if (this.y < 0) {
         // clearInterval(enemyInterval);
         alert("Winner!");
-        enemySpeed += 1;
-        interval -= 200;
-        reset();
+        ENEMY_SPEED += 1;
+        INTERVAL -= 200;
+        this.reset();
     }
+};
+
+// reset Player to original position
+Player.prototype.reset = function (){
+    player.x = playerInitX;
+    player.y = playerInitY;
 };
 
 
@@ -135,7 +146,7 @@ $( document ).ready(function() {
             enemy.y = randRow;
             allEnemies.push(enemy);
         }
-        enemyInterval = setInterval(createEnemy, interval);
+        enemyInterval = setInterval(createEnemy, INTERVAL);
         player.sprite = img;
         player.render();
     }
@@ -151,11 +162,6 @@ $( document ).ready(function() {
     });
 
 });
-
-function reset(){
-    player.x = playerInitX;
-    player.y = playerInitY;
-}
 
 
 
